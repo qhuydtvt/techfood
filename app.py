@@ -1,5 +1,5 @@
 from bson import ObjectId
-from flask import Flask
+from flask import Flask, request
 
 from questions import Question, QuestionCollection
 from versions import Version
@@ -20,6 +20,16 @@ def remove_dollar_sign(s):
     OLD_OID = "$oid"
     NEW_OID = "oid"
     return s.replace(OLD_OID, NEW_OID)
+
+@app.route('/api/login', methods=["POST"])
+def login():
+    form = request.form
+    user_name = form['username']
+    password = form['password']
+    if user_name == "admin" and password == "12345678":
+        return json.dumps({ "result_code" : 1, "message" : "Success" })
+    else:
+        return json.dumps({"result_code" : 0, "message" : "Failure" })
 
 @app.route('/api/food')
 def get_food():

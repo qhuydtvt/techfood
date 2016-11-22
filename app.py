@@ -37,27 +37,27 @@ def get_food():
                            [
                                {"name" : "Pizza",
                                 "detail":"Large pizza",
-                                "price": 100000,
+                                "price": 100,
                                 "image": "https://d2mekbzx20fc11.cloudfront.net/uploads/Peri-Peri-new-3001.png"},
 
                                {"name": "Humbuger",
                                 "detail": "Large Humbuger",
-                                "price": 50000,
+                                "price": 50,
                                 "image": "https://s-media-cache-ak0.pinimg.com/originals/64/b4/bd/64b4bdd1475b0cda9f6f8de6bfc635f9.jpg"},
 
                                {"name": "Salad",
                                 "detail": "Good salad",
-                                "price": 25000,
+                                "price": 25,
                                 "image": "https://s-media-cache-ak0.pinimg.com/564x/51/1b/2e/511b2e9b62016d362025b601195aba0f.jpg"},
 
                                {"name": "Taco",
                                 "detail": "Lovely taco",
-                                "price": "20000 VND",
+                                "price": 20,
                                 "image": "https://s-media-cache-ak0.pinimg.com/originals/5e/53/33/5e5333408376aa88abd5980d873eb180.jpg"},
 
                                {"name": "Apple juice",
                                 "detail": "Delicious apple juice",
-                                "price": "10000 VND",
+                                "price": 10,
                                 "image": "http://cdn.girlishh.com/wp-content/uploads/2013/09/apple-juice.jpg"}
                                ])
 

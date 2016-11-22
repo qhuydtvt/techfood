@@ -33,34 +33,33 @@ def login():
 
 @app.route('/api/food')
 def get_food():
-    return json.dumps({"items":
+    return json.dumps(
                            [
                                {"name" : "Pizza",
                                 "detail":"Large pizza",
-                                "price": "100000 VND",
-                                "image": "https://www.cicis.com/media/1138/pizza_trad_pepperoni.png"},
+                                "price": 100000,
+                                "image": "https://d2mekbzx20fc11.cloudfront.net/uploads/Peri-Peri-new-3001.png"},
 
                                {"name": "Humbuger",
                                 "detail": "Large Humbuger",
-                                "price": "50000 VND",
-                                "image": "http://www.awok.co.jp/wp/wp-content/uploads/2014/07/humberger-01.png"},
+                                "price": 50000,
+                                "image": "https://s-media-cache-ak0.pinimg.com/originals/64/b4/bd/64b4bdd1475b0cda9f6f8de6bfc635f9.jpg"},
 
                                {"name": "Salad",
                                 "detail": "Good salad",
-                                "price": "25000 VND",
-                                "image": "http://images.bigoven.com/image/upload/t_recipe-256/avocado-tomato-salad-534a1f.jpg"},
+                                "price": 25000,
+                                "image": "https://s-media-cache-ak0.pinimg.com/564x/51/1b/2e/511b2e9b62016d362025b601195aba0f.jpg"},
 
                                {"name": "Taco",
                                 "detail": "Lovely taco",
                                 "price": "20000 VND",
-                                "image": "http://pix.iemoji.com/images/emoji/apple/ios-9/256/taco.png"},
+                                "image": "https://s-media-cache-ak0.pinimg.com/originals/5e/53/33/5e5333408376aa88abd5980d873eb180.jpg"},
 
                                {"name": "Apple juice",
                                 "detail": "Delicious apple juice",
                                 "price": "10000 VND",
-                                "image": "https://dtgxwmigmg3gc.cloudfront.net/files/53a93526e1272f237300787c-icon-256x256.png"}
-                               ]})
+                                "image": "http://cdn.girlishh.com/wp-content/uploads/2013/09/apple-juice.jpg"}
+                               ])
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=9696)
-

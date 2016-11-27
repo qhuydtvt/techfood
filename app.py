@@ -672,5 +672,39 @@ def hairstyle():
   ]
 })
 
+# {
+# Phone : '09123123123',
+# CustomerName : 'Test API',
+# Email : 'testapi@gmail.com',
+# Password : 'api123',
+# DayOfBirth : 20,
+# MonthOfBirth : 10,
+# YearOfBirth : 1999
+# }
+
+@app.route("/api/register", methods=["POST"])
+def register():
+  json_data = request.get_json()
+  phone = json_data["Phone"]
+  customerName = json_data["CustomerName"]
+  email = json_data["Email"]
+  password = json_data["Password"]
+  day_of_birth = json_data["DayOfBirth"]
+  month_of_birth = json_data["MonthOfBirth"]
+  year_of_birth = json_data["YearOfBirth"]
+
+  return json.dumps({
+  "d": {
+    "Id": 83181,
+    "Phone": phone,
+    "CustomerName": customerName,
+    "Email": email,
+    "AccessToken": "xxxxooooo",
+    "DayOfBirth": day_of_birth,
+    "MonthOfBirth": month_of_birth,
+    "YearOfBirth": year_of_birth
+  }
+})
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=9696)

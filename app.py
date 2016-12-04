@@ -1,6 +1,7 @@
+from __future__ import unicode_literals
+
 from bson import ObjectId
 from flask import Flask, request
-
 from questions import Question, QuestionCollection
 from versions import Version
 from question_packs import QuestionPack, QuestionPackCollection
@@ -8,6 +9,10 @@ from users import User
 import json
 from flask import request
 import mongoengine
+
+import youtube_dl
+
+
 
 
 from mlab import  *
@@ -767,6 +772,30 @@ def company():
 
     }
   )
+
+@app.route("/api/youtube")
+def youtube():
+    ydl_opts = {}
+    args = request.args
+    if "url" in args:
+        url = args["url"]
+    else:
+        url = 'http://www.youtube.com/watch?v=BaW_jenozKc'
+    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+        vid_info = ydl.extract_info(url=url, download=False)
+        return json.dumps(vid_info)
+
+@app.route("/api/soundcloud")
+def soundcloud():
+    args = request.args
+    if "url" in args:
+        url = args["url"]
+    else:
+        url = 'https://soundcloud.com/svtoprod/son-tung-mtp-chung-ta-khong-thuoc-ve-nhau-svto-x-kk-bootleg'
+    ydl_opts = {}
+    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+        vid_info = ydl.extract_info(url=url, download=False)
+        return json.dumps(vid_info)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=9696)

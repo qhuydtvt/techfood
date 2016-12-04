@@ -16,3 +16,8 @@ mock
 gevent
 gunicorn
 mongoengine
+
+# ----------------------
+# Other
+# ----------------------
+youtube-dl

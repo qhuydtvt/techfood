@@ -706,5 +706,67 @@ def register():
   }
 })
 
+@app.route("/api/company")
+def company():
+  return json.dumps(
+    {
+      "content" : {
+          "author" : {
+              "name": "TechKids connect",
+              "url": "http://techkids.vn"
+          },
+          "items": [
+              {
+                  "name": "FPT Software",
+                  "phone": "+84473007575",
+                  "website": "https://www.fpt-software.com",
+                  "images": [
+                      {
+                          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/eb/LogoFSO1.jpg/220px-LogoFSO1.jpg",
+                          "type": "logo"
+                      },
+                      {
+                          "url": "http://www.cayxanhhoalac.com.vn/wp-content/uploads/2016/07/fpt-software.jpg",
+                          "type": "picture"
+                      }
+                  ]
+              },
+              {
+                  "name": "EWay",
+                  "phone": "+84432595450",
+                  "website": "https://eway.vn",
+                  "images": [
+                      {
+                          "url": "https://e27.co/img/startups/6595/logo-1443495246.png",
+                          "type": "logo"
+                      },
+                      {
+                          "url": "https://officesnapshots.com/wp-content/uploads/2015/08/eway-office-design-2.jpg",
+                          "type": "picture"
+                      }
+                  ]
+              },
+              {
+                  "name": "BraveBits",
+                  "phone": "+84463260066",
+                  "website": "http://www.bravebits.co/",
+                  "images": [
+                      {
+                          "url": "http://www.bravebits.co/wp-content/uploads/2016/02/Logo-01.svg",
+                          "type": "logo"
+                      },
+                      {
+                          "url": "http://www.bravebits.co/wp-content/uploads/2016/01/gallery_1-1024x683.jpg",
+                          "type": "picture"
+                      }
+                  ]
+              }
+          ]
+
+        }
+
+    }
+  )
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=9696)

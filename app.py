@@ -757,7 +757,7 @@ def company():
                   "website": "http://www.bravebits.co/",
                   "images": [
                       {
-                          "url": "http://www.bravebits.co/wp-content/uploads/2016/02/Logo-01.svg",
+                          "url": "http://i.imgur.com/8ONaQnl.png",
                           "type": "logo"
                       },
                       {
@@ -796,6 +796,7 @@ def soundcloud():
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
         vid_info = ydl.extract_info(url=url, download=False)
         return json.dumps(vid_info)
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=9696)

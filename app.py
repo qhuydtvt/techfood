@@ -731,7 +731,7 @@ def company():
                           "type": "logo"
                       },
                       {
-                          "url": "http://www.cayxanhhoalac.com.vn/wp-content/uploads/2016/07/fpt-software.jpg",
+                          "url": "http://www.reviewcompany.vn/public/media/uploads/company/gallery/2014-08-18/watermarked/c75bddabea3d35f812f2f45389ce05e0de18bf24.jpg",
                           "type": "picture"
                       }
                   ]

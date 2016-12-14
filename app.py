@@ -872,7 +872,7 @@ class RegisterRes(Resource):
     args = parser.parse_args()
     username = args["username"]
     password = args["password"]
-    found_user = User.objects(username=username)
+    found_user = User.objects(username=username).first()
     if found_user is not None:
       return {"result": 0, "message": "User already exists"}, 400
     user = User(username = username, password = password)

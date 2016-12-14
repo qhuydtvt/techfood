@@ -1,40 +1,47 @@
 from __future__ import unicode_literals
 
 from bson import ObjectId
-from flask import Flask, request
+from flask import Flask, request, session
 from questions import Question, QuestionCollection
 from versions import Version
 from question_packs import QuestionPack, QuestionPackCollection
-from users import User
+from user import User
+from usertoken import UserToken
 import json
 from flask import request
 import mongoengine
 
 import youtube_dl
+from flask_restful import Resource, Api, reqparse
+from todo import ToDo
+import json
+import hmac
 
-
-
+LOGIN_ENABLED = True
 
 from mlab import  *
 
 mongoengine.connect(db_name, host=host, port=port, username=user_name, password=password)
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = "y9rWGS|*d2[OBzOL0O6W\"8Mq8{esk6"
+
+api = Api(app)
 
 def remove_dollar_sign(s):
     OLD_OID = "$oid"
     NEW_OID = "oid"
     return s.replace(OLD_OID, NEW_OID)
 
-@app.route('/api/login', methods=["POST"])
-def login():
-    form = request.form
-    user_name = form['username']
-    password = form['password']
-    if user_name == "admin" and password == "12345678":
-        return json.dumps({ "result_code" : 1, "message" : "Success" })
-    else:
-        return json.dumps({"result_code" : 0, "message" : "Failure" })
+# @app.route('/api/login', methods=["POST"])
+# def login():
+#     form = request.form
+#     user_name = form['username']
+#     password = form['password']
+#     if user_name == "admin" and password == "12345678":
+#         return json.dumps({ "result_code" : 1, "message" : "Success" })
+#     else:
+#         return json.dumps({"result_code" : 0, "message" : "Failure" })
 
 @app.route('/api/food')
 def get_food():
@@ -687,29 +694,29 @@ def hairstyle():
 # YearOfBirth : 1999
 # }
 
-@app.route("/api/register", methods=["POST"])
-def register():
-  json_data = request.get_json()
-  phone = json_data["Phone"]
-  customerName = json_data["CustomerName"]
-  email = json_data["Email"]
-  password = json_data["Password"]
-  day_of_birth = json_data["DayOfBirth"]
-  month_of_birth = json_data["MonthOfBirth"]
-  year_of_birth = json_data["YearOfBirth"]
-
-  return json.dumps({
-  "d": {
-    "Id": 83181,
-    "Phone": phone,
-    "CustomerName": customerName,
-    "Email": email,
-    "AccessToken": "xxxxooooo",
-    "DayOfBirth": day_of_birth,
-    "MonthOfBirth": month_of_birth,
-    "YearOfBirth": year_of_birth
-  }
-})
+# @app.route("/api/register", methods=["POST"])
+# def register():
+#   json_data = request.get_json()
+#   phone = json_data["Phone"]
+#   customerName = json_data["CustomerName"]
+#   email = json_data["Email"]
+#   password = json_data["Password"]
+#   day_of_birth = json_data["DayOfBirth"]
+#   month_of_birth = json_data["MonthOfBirth"]
+#   year_of_birth = json_data["YearOfBirth"]
+#
+#   return json.dumps({
+#   "d": {
+#     "Id": 83181,
+#     "Phone": phone,
+#     "CustomerName": customerName,
+#     "Email": email,
+#     "AccessToken": "xxxxooooo",
+#     "DayOfBirth": day_of_birth,
+#     "MonthOfBirth": month_of_birth,
+#     "YearOfBirth": year_of_birth
+#   }
+# })
 
 @app.route("/api/company")
 def company():
@@ -797,6 +804,107 @@ def soundcloud():
         vid_info = ydl.extract_info(url=url, download=False)
         return json.dumps(vid_info)
 
+parser = reqparse.RequestParser()
+parser.add_argument('id', type=str, help='Id of the note')
+parser.add_argument('title', type=str, help='Title of the note')
+parser.add_argument('content', type=str, help='Content of the note')
+parser.add_argument("color", type=str, help='Color of the note')
+parser.add_argument("time_in_total", type=str, help='Color of the note')
+parser.add_argument("time_left", type=str, help='Color of the note')
+parser.add_argument('username', type=str, help='Username of noter')
+parser.add_argument('password', type=str, help='Password of noter')
+parser.add_argument('token', type=str, help='Token of noter', location="headers")
+
+class ToDoRes(Resource):
+  def get(self, todo_id):
+    args = parser.parse_args()
+    username = username_from(args["token"])
+    if LOGIN_ENABLED and username is None:
+      return {"result":0, "message": "Token not valid"}, 401
+    return json.loads(ToDo.objects(username=username, id=todo_id).first().to_json())
+
+# TODO
+  def delete(self, todo_id):
+    args = parser.parse_args()
+    username = username_from(args["token"])
+    if username is None:
+      return {}, 401
+    ToDo.objects(username=username).with_id(todo_id).delete()
+    return {"result": 1, "message": "DELETED"}, 200
+
+# TODO
+  def put(self, todo_id):
+    args = parser.parse_args()
+    title = args["title"]
+    content = args["content"]
+    color = args["color"]
+    username = username_from(args["token"])
+    if username is None:
+      return {}, 401
+    to_do = ToDo.objects(username=username).with_id(todo_id)
+    to_do.update(set__title=title, set__content=content, set__color=color)
+    return json.loads(to_do.to_json()), 200
+
+class ToDoListRes(Resource):
+  def get(self):
+    args = parser.parse_args()
+    token = args["token"]
+    if token not in session:
+      return [], 401
+    username = session[token]
+    return [json.loads(to_do.to_json()) for to_do in ToDo.objects(username=username).exclude("username")]
+
+  def post(self):
+    args = parser.parse_args()
+    token = args["token"]
+    title = args["title"]
+    content = args["content"]
+    color = args["color"]
+    username = username_from(token)
+    if LOGIN_ENABLED and username is None:
+      return {"result": 0, "message": "Not authenticated"}, 401
+    new_to_do = ToDo(title=title, content=content, color=color, username=username)
+    new_to_do.save()
+    return json.loads(ToDo.objects(username=username, id=new_to_do.id).exclude("username").to_json()), 201
+
+class RegisterRes(Resource):
+  def post(self):
+    args = parser.parse_args()
+    username = args["username"]
+    password = args["password"]
+    found_user = User.objects(username=username)
+    if found_user is not None:
+      return {"result": 0, "message": "User already exists"}, 400
+    user = User(username = username, password = password)
+    user.save()
+    return {"result": 1, "message": "Registered"}, 201
+
+class LoginRes(Resource):
+  def post(self):
+    args = parser.parse_args()
+    username = args["username"]
+    password = args["password"]
+    user = User.objects(username=username).first()
+    if user is None:
+      print("Could not find user")
+      return {"result": 0, "message": "User doesn't exist"}, 401
+    if password != user.password:
+      print("user name and password mismatch")
+      return {"result": 0, "message": "User or password doesn't match"}, 401
+
+    token = hmac.new(str.encode(username)).hexdigest()
+    session[token] = user_name
+    return {"result": 1, "message": "Logged in", "token": token}, 201
+
+api.add_resource(ToDoListRes, "/api/todos")
+api.add_resource(ToDoRes, "/api/todos/<todo_id>")
+api.add_resource(RegisterRes, "/api/register")
+api.add_resource(LoginRes, "/api/login")
+
+def username_from(token):
+  if token not in session:
+    return None
+  return session[token]
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=9696)

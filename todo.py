@@ -5,4 +5,5 @@ class ToDo(Document):
     username = StringField()
     title = StringField()
     content = StringField()
+    completed = BooleanField(default=False)
     color = StringField()

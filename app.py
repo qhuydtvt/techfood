@@ -811,6 +811,7 @@ parser.add_argument('content', type=str, help='Content of the note')
 parser.add_argument("color", type=str, help='Color of the note')
 parser.add_argument("time_in_total", type=str, help='Color of the note')
 parser.add_argument("time_left", type=str, help='Color of the note')
+parser.add_argument("completed", type=bool, help='Color of the note')
 parser.add_argument('username', type=str, help='Username of noter')
 parser.add_argument('password', type=str, help='Password of noter')
 parser.add_argument('token', type=str, help='Token of noter', location="headers")
@@ -829,7 +830,7 @@ class ToDoRes(Resource):
     username = username_from(args["token"])
     if username is None:
       return {}, 401
-    ToDo.objects(username=username).with_id(todo_id).delete()
+    ToDo.objects(username=username, id=todo_id).first().delete()
     return {"result": 1, "message": "DELETED"}, 200
 
 # TODO
@@ -838,11 +839,12 @@ class ToDoRes(Resource):
     title = args["title"]
     content = args["content"]
     color = args["color"]
+    completed = args["completed"]
     username = username_from(args["token"])
     if username is None:
       return {}, 401
-    to_do = ToDo.objects(username=username).with_id(todo_id)
-    to_do.update(set__title=title, set__content=content, set__color=color)
+    to_do = ToDo.objects(username=username, id=todo_id).first()
+    to_do.update(set__title=title, set__content=content, set__color=color, set__completed=completed)
     return json.loads(to_do.to_json()), 200
 
 class ToDoListRes(Resource):
@@ -907,4 +909,6 @@ def username_from(token):
   return session[token]
 
 if __name__ == '__main__':
+    # for todo in ToDo.objects:
+    #   todo.delete()
     app.run(host='0.0.0.0', port=9696)

@@ -881,10 +881,9 @@ class ToDoListRes(Resource):
 class V2ToDoListRes(Resource):
   def get(self):
     args = parser.parse_args()
-    token = args["token"]
-    if token not in session:
+    username = username_from(args["token"])
+    if username is None:
         return [], 401
-    username = session[token]
     return [json.loads(to_do.to_json()) for to_do in ToDo.objects(username=username).exclude("username")]
 
   def post(self):

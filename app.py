@@ -883,7 +883,7 @@ class V2ToDoListRes(Resource):
     args = parser.parse_args()
     username = username_from(args["token"])
     if username is None:
-        return [], 401
+        return {"token": args["token"]}, 401
     return [json.loads(to_do.to_json()) for to_do in ToDo.objects(username=username).exclude("username")]
 
   def post(self):

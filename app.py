@@ -17,7 +17,7 @@ from todo import ToDo
 import json
 import hmac
 
-LOGIN_ENABLED = True
+LOGIN_ENABLED = False
 
 from mlab import  *
 
@@ -850,11 +850,14 @@ class ToDoRes(Resource):
 class ToDoListRes(Resource):
   def get(self):
     args = parser.parse_args()
-    token = args["token"]
-    if token not in session:
-      return [], 401
-    username = session[token]
-    return [json.loads(to_do.to_json()) for to_do in ToDo.objects(username=username).exclude("username")]
+    if LOGIN_ENABLED:
+      token = args["token"]
+      if token not in session:
+        return [], 401
+      username = session[token]
+      return [json.loads(to_do.to_json()) for to_do in ToDo.objects(username=username).exclude("username")]
+    else:
+      return [json.loads(to_do.to_json()) for to_do in ToDo.objects()]
 
   def post(self):
     args = parser.parse_args()
@@ -862,12 +865,18 @@ class ToDoListRes(Resource):
     title = args["title"]
     content = args["content"]
     color = args["color"]
-    username = username_from(token)
-    if LOGIN_ENABLED and username is None:
-      return {"result": 0, "message": "Not authenticated"}, 401
-    new_to_do = ToDo(title=title, content=content, color=color, username=username)
-    new_to_do.save()
-    return json.loads(ToDo.objects(username=username, id=new_to_do.id).exclude("username").to_json()), 201
+    if LOGIN_ENABLED:
+
+      username = username_from(token)
+      if LOGIN_ENABLED and username is None:
+        return {"result": 0, "message": "Not authenticated"}, 401
+      new_to_do = ToDo(title=title, content=content, color=color, username=username)
+      new_to_do.save()
+      return json.loads(ToDo.objects(username=username, id=new_to_do.id).exclude("username").to_json()), 201
+    else:
+      new_to_do = ToDo(title=title, content=content, color=color, username="")
+      new_to_do.save()
+      return json.loads(ToDo.objects(id=new_to_do.id).exclude("username").to_json()), 201
 
 class RegisterRes(Resource):
   def post(self):

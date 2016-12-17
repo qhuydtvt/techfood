@@ -857,7 +857,7 @@ class ToDoListRes(Resource):
       username = session[token]
       return [json.loads(to_do.to_json()) for to_do in ToDo.objects(username=username).exclude("username")]
     else:
-      return [json.loads(to_do.to_json()) for to_do in ToDo.objects()]
+      return [json.loads(to_do.to_json()) for to_do in ToDo.objects().exclude("username")]
 
   def post(self):
     args = parser.parse_args()
@@ -877,6 +877,28 @@ class ToDoListRes(Resource):
       new_to_do = ToDo(title=title, content=content, color=color, username="")
       new_to_do.save()
       return json.loads(ToDo.objects(id=new_to_do.id).exclude("username").to_json()), 201
+
+class V2ToDoListRes(Resource):
+  def get(self):
+    args = parser.parse_args()
+    token = args["token"]
+    if token not in session:
+        return [], 401
+    username = session[token]
+    return [json.loads(to_do.to_json()) for to_do in ToDo.objects(username=username).exclude("username")]
+
+  def post(self):
+    args = parser.parse_args()
+    token = args["token"]
+    title = args["title"]
+    content = args["content"]
+    color = args["color"]
+    username = username_from(token)
+    if LOGIN_ENABLED and username is None:
+        return {"result": 0, "message": "Not authenticated"}, 401
+    new_to_do = ToDo(title=title, content=content, color=color, username=username)
+    new_to_do.save()
+    return json.loads(ToDo.objects(username=username, id=new_to_do.id).exclude("username").to_json()), 201
 
 class RegisterRes(Resource):
   def post(self):
@@ -908,6 +930,7 @@ class LoginRes(Resource):
     return {"result": 1, "message": "Logged in", "token": token}, 201
 
 api.add_resource(ToDoListRes, "/api/todos")
+api.add_resource(V2ToDoListRes, "/api/v2/todos")
 api.add_resource(ToDoRes, "/api/todos/<todo_id>")
 api.add_resource(RegisterRes, "/api/register")
 api.add_resource(LoginRes, "/api/login")

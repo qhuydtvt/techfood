@@ -8,7 +8,6 @@ from question_packs import QuestionPack, QuestionPackCollection
 from user import User
 from usertoken import UserToken
 import json
-from flask import request
 import mongoengine
 
 import youtube_dl
@@ -24,9 +23,8 @@ from mlab import  *
 mongoengine.connect(db_name, host=host, port=port, username=user_name, password=password)
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = "y9rWGS|*d2[OBzOL0O6W\"8Mq8{esk6"
-
 api = Api(app)
+
 
 def remove_dollar_sign(s):
     OLD_OID = "$oid"
@@ -941,4 +939,6 @@ def username_from(token):
 if __name__ == '__main__':
     # for todo in ToDo.objects:
     #   todo.delete()
+    app.secret_key = "y9rWGS|*d2[OBzOL0O6W\"8Mq8{esk6"
+    app.config['SECRET_KEY'] = "y9rWGS|*d2[OBzOL0O6W\"8Mq8{esk6"
     app.run(host='0.0.0.0', port=9696)

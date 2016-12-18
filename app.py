@@ -881,9 +881,10 @@ class ToDoListRes(Resource):
 class V2ToDoListRes(Resource):
   def get(self):
     args = parser.parse_args()
-    username = username_from(args["token"])
+    token = args["token"]
+    username = username_from(token)
     if username is None:
-        return {"session": session}, 401
+        return {"session": str(token)}, 401
     return [json.loads(to_do.to_json()) for to_do in ToDo.objects(username=username).exclude("username")]
 
   def post(self):
@@ -925,7 +926,7 @@ class LoginRes(Resource):
       return {"result": 0, "message": "User or password doesn't match"}, 401
 
     token = hmac.new(str.encode(username)).hexdigest()
-    session[token] = user_name
+    session[str(token)] = user_name
     return {"result": 1, "message": "Logged in", "token": token}, 201
 
 api.add_resource(ToDoListRes, "/api/todos")
@@ -937,7 +938,7 @@ api.add_resource(LoginRes, "/api/login")
 def username_from(token):
   if token not in session:
     return None
-  return session[token]
+  return session[str(token)]
 
 if __name__ == '__main__':
     # for todo in ToDo.objects:

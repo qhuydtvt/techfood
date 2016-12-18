@@ -884,7 +884,7 @@ class V2ToDoListRes(Resource):
     token = args["token"]
     username = username_from(token)
     if username is None:
-        return {"session": str(token)}, 401
+        return {"session": [str(key) for key in session]}, 401
     return [json.loads(to_do.to_json()) for to_do in ToDo.objects(username=username).exclude("username")]
 
   def post(self):

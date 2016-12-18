@@ -842,6 +842,39 @@ class ToDoRes(Resource):
     to_do.update(set__title=title, set__content=content, set__color=color, set__completed=completed)
     return json.loads(to_do.to_json()), 200
 
+class V2ToDoRes(Resource):
+  def get(self, todo_id):
+    args = parser.parse_args()
+    user = user_from(args["token"])
+    if LOGIN_ENABLED and user is None:
+      return {"result":0, "message": "Token not valid"}, 401
+    username = user.username
+    return json.loads(ToDo.objects(username=username, id=todo_id).first().to_json())
+
+# TODO
+  def delete(self, todo_id):
+    args = parser.parse_args()
+    user = user_from(args["token"])
+    if user is None:
+      return {}, 401
+    ToDo.objects(username=user.username, id=todo_id).first().delete()
+    return {"result": 1, "message": "DELETED"}, 200
+
+# TODO
+  def put(self, todo_id):
+    args = parser.parse_args()
+    title = args["title"]
+    content = args["content"]
+    color = args["color"]
+    completed = args["completed"]
+    user = user_from(args["token"])
+    if user is None:
+      return {}, 401
+    username = user.username
+    to_do = ToDo.objects(username=username, id=todo_id).first()
+    to_do.update(set__title=title, set__content=content, set__color=color, set__completed=completed)
+    return json.loads(to_do.to_json()), 200
+
 class ToDoListRes(Resource):
   def get(self):
     args = parser.parse_args()
@@ -873,6 +906,7 @@ class ToDoListRes(Resource):
       new_to_do = ToDo(title=title, content=content, color=color, username="")
       new_to_do.save()
       return json.loads(ToDo.objects(id=new_to_do.id).exclude("username").to_json()), 201
+
 
 class V2ToDoListRes(Resource):
   def get(self):
@@ -928,6 +962,35 @@ class LoginRes(Resource):
     User.objects().with_id(user.id).update(set__token=token)
     return {"result": 1, "message": "Logged in", "token": token}, 201
 
+class V2RegisterRes(Resource):
+  def post(self):
+    args = parser.parse_args()
+    username = args["username"]
+    password = args["password"]
+    found_user = User.objects(username=username).first()
+    if found_user is not None:
+      return {"result": 0, "message": "User already exists"}, 400
+    user = User(username = username, password = password)
+    user.save()
+    return {"result": 1, "message": "Registered"}, 201
+
+class V2LoginRes(Resource):
+  def post(self):
+    args = parser.parse_args()
+    username = args["username"]
+    password = args["password"]
+    user = User.objects(username=username).first()
+    if user is None:
+      print("Could not find user")
+      return {"result": 0, "message": "User doesn't exist"}, 401
+    if password != user.password:
+      print("user name and password mismatch")
+      return {"result": 0, "message": "User or password doesn't match"}, 401
+
+    token = hmac.new(str.encode(username)).hexdigest()
+    User.objects().with_id(user.id).update(set__token=token)
+    return {"result": 1, "message": "Logged in", "token": token}, 201
+
 
 api.add_resource(ToDoListRes, "/api/todos")
 api.add_resource(ToDoRes, "/api/todos/<todo_id>")
@@ -935,9 +998,9 @@ api.add_resource(RegisterRes, "/api/register")
 api.add_resource(LoginRes, "/api/login")
 
 api.add_resource(V2ToDoListRes, "/api/v2/todos")
-api.add_resource(ToDoRes, "/api/v2/todos/<todo_id>")
-api.add_resource(RegisterRes, "/api/v2/register")
-api.add_resource(LoginRes, "/api/v2/login")
+api.add_resource(V2ToDoRes, "/api/v2/todos/<todo_id>")
+api.add_resource(V2RegisterRes, "/api/v2/register")
+api.add_resource(V2LoginRes, "/api/v2/login")
 
 def user_from(token):
   return User.objects(token=token).first()

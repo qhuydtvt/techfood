@@ -822,18 +822,19 @@ parser.add_argument('token', type=str, help='Token of noter', location="headers"
 class ToDoRes(Resource):
   def get(self, todo_id):
     args = parser.parse_args()
-    username = username_from(args["token"])
-    if LOGIN_ENABLED and username is None:
+    user = user_from(args["token"])
+    if LOGIN_ENABLED and user is None:
       return {"result":0, "message": "Token not valid"}, 401
+    username = user.username
     return json.loads(ToDo.objects(username=username, id=todo_id).first().to_json())
 
 # TODO
   def delete(self, todo_id):
     args = parser.parse_args()
-    username = username_from(args["token"])
-    if username is None:
+    user = user_from(args["token"])
+    if user is None:
       return {}, 401
-    ToDo.objects(username=username, id=todo_id).first().delete()
+    ToDo.objects(username=user.username, id=todo_id).first().delete()
     return {"result": 1, "message": "DELETED"}, 200
 
 # TODO
@@ -843,9 +844,10 @@ class ToDoRes(Resource):
     content = args["content"]
     color = args["color"]
     completed = args["completed"]
-    username = username_from(args["token"])
-    if username is None:
+    user = user_from(args["token"])
+    if user is None:
       return {}, 401
+    username = user.username
     to_do = ToDo.objects(username=username, id=todo_id).first()
     to_do.update(set__title=title, set__content=content, set__color=color, set__completed=completed)
     return json.loads(to_do.to_json()), 200
@@ -870,9 +872,10 @@ class ToDoListRes(Resource):
     color = args["color"]
     if LOGIN_ENABLED:
 
-      username = username_from(token)
-      if LOGIN_ENABLED and username is None:
+      user = user_from(token)
+      if LOGIN_ENABLED and user is None:
         return {"result": 0, "message": "Not authenticated"}, 401
+      username = user.username
       new_to_do = ToDo(title=title, content=content, color=color, username=username)
       new_to_do.save()
       return json.loads(ToDo.objects(username=username, id=new_to_do.id).exclude("username").to_json()), 201
@@ -890,7 +893,7 @@ class V2ToDoListRes(Resource):
     if user is None:
         return {"token": token, "user": user}, 401
     username = user.username
-    return [json.loads(to_do.to_json()) for to_do in ToDo.objects(username=user.username).exclude("username")]
+    return [json.loads(to_do.to_json()) for to_do in ToDo.objects(username=username).exclude("username")]
 
   def post(self):
     args = parser.parse_args()
@@ -898,9 +901,10 @@ class V2ToDoListRes(Resource):
     title = args["title"]
     content = args["content"]
     color = args["color"]
-    username = username_from(token)
-    if LOGIN_ENABLED and username is None:
+    user = user_from(token)
+    if LOGIN_ENABLED and user is None:
         return {"result": 0, "message": "Not authenticated"}, 401
+    username = user.username
     new_to_do = ToDo(title=title, content=content, color=color, username=username)
     new_to_do.save()
     return json.loads(ToDo.objects(username=username, id=new_to_do.id).exclude("username").to_json()), 201
@@ -939,9 +943,6 @@ api.add_resource(V2ToDoListRes, "/api/v2/todos")
 api.add_resource(ToDoRes, "/api/todos/<todo_id>")
 api.add_resource(RegisterRes, "/api/register")
 api.add_resource(LoginRes, "/api/login")
-
-def username_from(token):
-  return User.objects(token=token).first()
 
 def user_from(token):
   return User.objects(token=token).first()

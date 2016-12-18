@@ -10,7 +10,6 @@ from user import User
 from usertoken import UserToken
 import json
 import mongoengine
-from redis import Redis
 
 import youtube_dl
 from flask_restful import Resource, Api, reqparse
@@ -29,7 +28,6 @@ app.secret_key = "y9rWGS|*d2[OBzOL0O6W\"8Mq8{esk6"
 app.config['SECRET_KEY'] = "y9rWGS|*d2[OBzOL0O6W\"8Mq8{esk6"
 SESSION_TYPE = 'redis'
 api = Api(app)
-
 
 def remove_dollar_sign(s):
     OLD_OID = "$oid"

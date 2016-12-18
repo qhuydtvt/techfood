@@ -936,9 +936,7 @@ api.add_resource(RegisterRes, "/api/register")
 api.add_resource(LoginRes, "/api/login")
 
 def username_from(token):
-  if token not in session:
-    return None
-  return session[str(token)]
+  return session.get(token)
 
 if __name__ == '__main__':
     # for todo in ToDo.objects:

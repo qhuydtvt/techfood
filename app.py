@@ -23,6 +23,8 @@ from mlab import  *
 mongoengine.connect(db_name, host=host, port=port, username=user_name, password=password)
 
 app = Flask(__name__)
+app.secret_key = "y9rWGS|*d2[OBzOL0O6W\"8Mq8{esk6"
+app.config['SECRET_KEY'] = "y9rWGS|*d2[OBzOL0O6W\"8Mq8{esk6"
 api = Api(app)
 
 
@@ -939,6 +941,5 @@ def username_from(token):
 if __name__ == '__main__':
     # for todo in ToDo.objects:
     #   todo.delete()
-    app.secret_key = "y9rWGS|*d2[OBzOL0O6W\"8Mq8{esk6"
-    app.config['SECRET_KEY'] = "y9rWGS|*d2[OBzOL0O6W\"8Mq8{esk6"
+
     app.run(host='0.0.0.0', port=9696)

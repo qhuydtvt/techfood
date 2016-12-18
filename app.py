@@ -11,7 +11,7 @@ import hmac
 
 LOGIN_ENABLED = False
 
-from mlab import  *
+from mlab import *
 
 mongoengine.connect(db_name, host=host, port=port, username=user_name, password=password)
 
@@ -928,11 +928,16 @@ class LoginRes(Resource):
     User.objects().with_id(user.id).update(set__token=token)
     return {"result": 1, "message": "Logged in", "token": token}, 201
 
+
 api.add_resource(ToDoListRes, "/api/todos")
-api.add_resource(V2ToDoListRes, "/api/v2/todos")
 api.add_resource(ToDoRes, "/api/todos/<todo_id>")
 api.add_resource(RegisterRes, "/api/register")
 api.add_resource(LoginRes, "/api/login")
+
+api.add_resource(V2ToDoListRes, "/api/v2/todos")
+api.add_resource(ToDoRes, "/api/v2/todos/<todo_id>")
+api.add_resource(RegisterRes, "/api/v2/register")
+api.add_resource(LoginRes, "/api/v2/login")
 
 def user_from(token):
   return User.objects(token=token).first()

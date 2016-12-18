@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 from bson import ObjectId
 from flask import Flask, request, session
+from flask_session import Session
 from questions import Question, QuestionCollection
 from versions import Version
 from question_packs import QuestionPack, QuestionPackCollection
@@ -9,6 +10,7 @@ from user import User
 from usertoken import UserToken
 import json
 import mongoengine
+from redis import Redis
 
 import youtube_dl
 from flask_restful import Resource, Api, reqparse
@@ -25,6 +27,7 @@ mongoengine.connect(db_name, host=host, port=port, username=user_name, password=
 app = Flask(__name__)
 app.secret_key = "y9rWGS|*d2[OBzOL0O6W\"8Mq8{esk6"
 app.config['SECRET_KEY'] = "y9rWGS|*d2[OBzOL0O6W\"8Mq8{esk6"
+SESSION_TYPE = 'redis'
 api = Api(app)
 
 
@@ -882,10 +885,12 @@ class V2ToDoListRes(Resource):
   def get(self):
     args = parser.parse_args()
     token = args["token"]
-    username = username_from(token)
-    if username is None:
-        return {"token": token, "username": username}, 401
-    return [json.loads(to_do.to_json()) for to_do in ToDo.objects(username=username).exclude("username")]
+    user = user_from(token)
+
+    if user is None:
+        return {"token": token, "user": user}, 401
+    username = user.username
+    return [json.loads(to_do.to_json()) for to_do in ToDo.objects(username=user.username).exclude("username")]
 
   def post(self):
     args = parser.parse_args()
@@ -926,7 +931,7 @@ class LoginRes(Resource):
       return {"result": 0, "message": "User or password doesn't match"}, 401
 
     token = hmac.new(str.encode(username)).hexdigest()
-    session[str(token)] = user_name
+    User.objects().with_id(user.id).update(set__token=token)
     return {"result": 1, "message": "Logged in", "token": token}, 201
 
 api.add_resource(ToDoListRes, "/api/todos")
@@ -936,10 +941,13 @@ api.add_resource(RegisterRes, "/api/register")
 api.add_resource(LoginRes, "/api/login")
 
 def username_from(token):
-  return session.get(token)
+  return User.objects(token=token).first()
+
+def user_from(token):
+  return User.objects(token=token).first()
 
 if __name__ == '__main__':
     # for todo in ToDo.objects:
     #   todo.delete()
 
-    app.run(host='0.0.0.0', port=9696)
+    app.run(host='0.0.0.0', port=6969)

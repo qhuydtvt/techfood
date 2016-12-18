@@ -1,14 +1,6 @@
 from __future__ import unicode_literals
-
-from bson import ObjectId
 from flask import Flask, request, session
-from flask_session import Session
-from questions import Question, QuestionCollection
-from versions import Version
-from question_packs import QuestionPack, QuestionPackCollection
 from user import User
-from usertoken import UserToken
-import json
 import mongoengine
 
 import youtube_dl
@@ -948,5 +940,4 @@ def user_from(token):
 if __name__ == '__main__':
     # for todo in ToDo.objects:
     #   todo.delete()
-
     app.run(host='0.0.0.0', port=6969)
